@@ -68,14 +68,13 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: 3;
             background-image: var(--logo-bg);
             background-repeat: no-repeat;
             background-position: center center;
-            background-size: min(70vw, 70vh);
-            opacity: 0.07;
-            filter: grayscale(1) contrast(1.1);
-            mix-blend-mode: screen;
+            background-size: min(60vw, 60vh);
+            opacity: 0.1;
+            filter: grayscale(1) contrast(1.15) brightness(1.4);
             pointer-events: none;
         }
 
@@ -377,11 +376,11 @@
 
         /* Hand Gesture Guide */
             #gesture-guide {
+                display: none; /* Ẩn hàng gợi ý vẫy trái/phải + icon nắm tay theo yêu cầu */
                 position: absolute;
                 bottom: 150px;
                 left: 50%;
                 transform: translateX(-50%);
-                display: flex;
                 gap: 20px;
                 opacity: 0;
                 transition: opacity 0.5s;
@@ -2115,6 +2114,22 @@ const CARD_DATA = {
                     
                     // Stop if very slow
                     if (Math.abs(velocity) < 0.0001) velocity = 0;
+
+                    // Hiệu ứng "khựng" nhẹ: khi tốc độ đã chậm lại gần 1 lá,
+                    // kéo nhẹ về đúng vị trí lá đó để dễ dừng lại chính xác hơn
+                    // thay vì trôi tự do qua các lá.
+                    const SNAP_VELOCITY_THRESHOLD = 0.035;
+                    const SNAP_STRENGTH = 0.16;
+                    if (Math.abs(velocity) < SNAP_VELOCITY_THRESHOLD) {
+                        const nearest = Math.round(currentIndex);
+                        const distToNearest = nearest - currentIndex;
+                        currentIndex += distToNearest * SNAP_STRENGTH;
+                        velocity *= 0.65; // thêm lực cản nhẹ tạo cảm giác "khựng" khi vào đúng lá
+                        if (Math.abs(distToNearest) < 0.01) {
+                            currentIndex = nearest;
+                            velocity = 0;
+                        }
+                    }
 
                     // Bounds Checking with Bounce/Damping
                     if (currentIndex < 0) {
