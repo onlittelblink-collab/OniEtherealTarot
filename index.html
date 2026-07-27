@@ -1354,9 +1354,8 @@ const CARD_DATA = {
             "Judgement": "Judgement (Phán Xét)", "The World": "The World (Thế Giới)"
         };
         function vnName(englishName) {
-            if (MAJOR_VN[englishName]) return MAJOR_VN[englishName];
-            const [rank, , suit] = englishName.split(' ');
-            return `${RANK_VN[rank]} ${SUIT_VN[suit]}`;
+            // Giữ nguyên tên tiếng Anh gốc của lá bài, không dịch sang tiếng Việt
+            return englishName;
         }
 
         let currentDeck = [];
