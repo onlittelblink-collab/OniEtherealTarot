@@ -62,7 +62,7 @@
             user-select: none;
         }
 
-        /* Logo watermark — hình nền chìm của toàn trang */
+        /* Logo watermark — hình nền chìm của toàn trang, phủ toàn màn hình */
         #logo-watermark {
             position: fixed;
             inset: 0;
@@ -72,8 +72,8 @@
             background-image: var(--logo-bg);
             background-repeat: no-repeat;
             background-position: center center;
-            background-size: min(60vw, 60vh);
-            opacity: 0.1;
+            background-size: cover;
+            opacity: 0.12;
             filter: grayscale(1) contrast(1.15) brightness(1.4);
             pointer-events: none;
         }
@@ -1605,6 +1605,12 @@ const CARD_DATA = {
                     return; // Skip positioning logic for picked cards
                 }
 
+                // Tắt CSS transition trong lúc điều hướng: vì transform được set lại
+                // mỗi khung hình (rAF), để CSS transition 0.4s hoạt động song song sẽ
+                // gây độ trễ/giật (mỗi frame lại khởi động lại easing cũ). Set transform
+                // trực tiếp không transition sẽ mượt và phản hồi tức thời theo tay.
+                card.style.transition = 'box-shadow 0.3s';
+
                 const dist = i - currentIndex;
                 
                 if (Math.abs(dist) > visibleSideCount) {
@@ -1682,6 +1688,10 @@ const CARD_DATA = {
                     }, i * 500 + 500); // Staggered reveal
                 }
                 
+                // Đây là 1 lần đặt vị trí rời rạc (không phải cập nhật liên tục theo
+                // khung hình), nên bật lại transition cho transform để có hiệu ứng
+                // bay/di chuyển mượt vào đúng vị trí.
+                card.style.transition = 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s';
                 card.style.transform = `translateX(${x}px) scale(1.1)`;
                 card.style.zIndex = 10;
             });
@@ -2119,12 +2129,12 @@ const CARD_DATA = {
                     // kéo nhẹ về đúng vị trí lá đó để dễ dừng lại chính xác hơn
                     // thay vì trôi tự do qua các lá.
                     const SNAP_VELOCITY_THRESHOLD = 0.035;
-                    const SNAP_STRENGTH = 0.16;
+                    const SNAP_STRENGTH = 0.11;
                     if (Math.abs(velocity) < SNAP_VELOCITY_THRESHOLD) {
                         const nearest = Math.round(currentIndex);
                         const distToNearest = nearest - currentIndex;
                         currentIndex += distToNearest * SNAP_STRENGTH;
-                        velocity *= 0.65; // thêm lực cản nhẹ tạo cảm giác "khựng" khi vào đúng lá
+                        velocity *= 0.8; // lực cản nhẹ, mượt hơn khi vào đúng lá
                         if (Math.abs(distToNearest) < 0.01) {
                             currentIndex = nearest;
                             velocity = 0;
